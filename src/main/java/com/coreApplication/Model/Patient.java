@@ -2,15 +2,15 @@ package com.coreApplication.Model;
 
 public class Patient {
     private Long id;
-    private String name;
+    private String patientName;
     private int age;
     private String notes;
 
     public Patient() {}
 
-    public Patient(Long id, String name, int age, String notes) {
+    public Patient(Long id, String patientName, int age, String notes) {
         this.id = id;
-        this.name = name;
+        this.patientName = patientName;
         this.age = age;
         this.notes = notes;
     }
@@ -23,12 +23,12 @@ public class Patient {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getPatientName() {
+        return patientName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
     }
 
     public int getAge() {
