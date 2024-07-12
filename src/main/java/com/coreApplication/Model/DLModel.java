@@ -1,12 +1,16 @@
 package com.coreApplication.Model;
 
-import ai.onnxruntime.*;
+import ai.onnxruntime.OnnxTensor;
+import ai.onnxruntime.OrtEnvironment;
+import ai.onnxruntime.OrtSession;
+import edu.stanford.nlp.simple.*;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static ai.onnxruntime.OrtEnvironment.getEnvironment;
+import java.util.stream.Collectors;
 
 public class DLModel {
 
@@ -14,43 +18,36 @@ public class DLModel {
     private final OrtSession session;
 
     public DLModel() throws Exception {
-        // Initialize the environment and session for ONNX Runtime
-        env = getEnvironment();
+        env = OrtEnvironment.getEnvironment();
         session = env.createSession(Files.readAllBytes(Paths.get("/Users/user/Downloads/model.onnx")));
     }
 
     public float predict(String text) throws Exception {
-        // Preprocess the text to convert it into a format suitable for your model
-        // This includes tokenization and encoding similar to the Python function
         Map<String, OnnxTensor> inputs = preprocess(text);
-
-        // Run the model
         OrtSession.Result results = session.run(inputs);
-
-        // Extract and convert the output to a probability
-        // Adjust this part based on your model's specific output format
         float[][] output = (float[][]) results.get(0).getValue();
         return convertToProbability(output);
     }
 
     private Map<String, OnnxTensor> preprocess(String text) throws Exception {
-        // Implement preprocessing of the text here
-        // This should include tokenization and encoding similar to the Python function
-        // The following is a placeholder example
-        long[][] inputIds = {/* tokenized and encoded text */};
-        long[][] attentionMask = {/* attention mask for the input */};
+        Document doc = new Document(text);
+        List<String> tokens = doc.sentences().stream()
+                .flatMap(sentence -> sentence.words().stream())
+                .collect(Collectors.toList());
+
+        // Example tokenization logic; replace with actual token IDs and attention mask generation
+        long[] inputIds = tokens.stream().mapToLong(token -> token.hashCode() & 0xfffffff).toArray();
+        long[] attentionMask = new long[inputIds.length];
+        java.util.Arrays.fill(attentionMask, 1);
 
         Map<String, OnnxTensor> inputs = new HashMap<>();
-        inputs.put("input_ids", OnnxTensor.createTensor(env, inputIds));
-        inputs.put("attention_mask", OnnxTensor.createTensor(env, attentionMask));
+        inputs.put("input_ids", OnnxTensor.createTensor(env, new long[][]{inputIds}));
+        inputs.put("attention_mask", OnnxTensor.createTensor(env, new long[][]{attentionMask}));
 
         return inputs;
     }
-    
+
     private float convertToProbability(float[][] output) {
-        // Implement the conversion of model output to a probability
-        // This can vary based on the model's output format
-        // The following is a placeholder example
         return output[0][0];
     }
 }
