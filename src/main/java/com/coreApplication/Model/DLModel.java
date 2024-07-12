@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ai.onnxruntime.OrtEnvironment.getEnvironment;
+
 public class DLModel {
 
     private final OrtEnvironment env;
@@ -13,32 +15,42 @@ public class DLModel {
 
     public DLModel() throws Exception {
         // Initialize the environment and session for ONNX Runtime
-        env = OrtEnvironment.getEnvironment();
-        session = env.createSession(Files.readAllBytes(Paths.get("p/Users/user/Downloads/model.onnx")));
+        env = getEnvironment();
+        session = env.createSession(Files.readAllBytes(Paths.get("/Users/user/Downloads/model.onnx")));
     }
 
     public float predict(String text) throws Exception {
         // Preprocess the text to convert it into a format suitable for your model
+        // This includes tokenization and encoding similar to the Python function
         Map<String, OnnxTensor> inputs = preprocess(text);
 
         // Run the model
         OrtSession.Result results = session.run(inputs);
 
-        // Extract and return the prediction from the results
+        // Extract and convert the output to a probability
+        // Adjust this part based on your model's specific output format
         float[][] output = (float[][]) results.get(0).getValue();
-        return output[0][0]; // Adjust based on your model's output
+        return convertToProbability(output);
     }
 
     private Map<String, OnnxTensor> preprocess(String text) throws Exception {
         // Implement preprocessing of the text here
-        // This is a placeholder example, replace it with actual preprocessing logic
-        long[][] inputIds = {{101, 2054, 2003, 1996, 2160, 102}};
-        long[][] attentionMask = {{1, 1, 1, 1, 1, 1}};
+        // This should include tokenization and encoding similar to the Python function
+        // The following is a placeholder example
+        long[][] inputIds = {/* tokenized and encoded text */};
+        long[][] attentionMask = {/* attention mask for the input */};
 
         Map<String, OnnxTensor> inputs = new HashMap<>();
         inputs.put("input_ids", OnnxTensor.createTensor(env, inputIds));
         inputs.put("attention_mask", OnnxTensor.createTensor(env, attentionMask));
 
         return inputs;
+    }
+    
+    private float convertToProbability(float[][] output) {
+        // Implement the conversion of model output to a probability
+        // This can vary based on the model's output format
+        // The following is a placeholder example
+        return output[0][0];
     }
 }
