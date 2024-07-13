@@ -1,15 +1,10 @@
 package com.coreApplication.Utils;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
 public class PredictionRequest {
     private String text;
-
-    PredictionRequest() {}
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
 }
