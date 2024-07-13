@@ -22,15 +22,16 @@ public class DLModel {
     public float predict(String text) throws Exception {
         // Preprocess the text to convert it into a format suitable for your model
         // This includes tokenization and encoding similar to the Python function
-        Map<String, OnnxTensor> inputs = preprocess(text);
-
-        // Run the model
-        OrtSession.Result results = session.run(inputs);
-
-        // Extract and convert the output to a probability
-        // Adjust this part based on your model's specific output format
-        float[][] output = (float[][]) results.get(0).getValue();
-        return convertToProbability(output);
+//        Map<String, OnnxTensor> inputs = preprocess(text);
+//
+//        // Run the model
+//        OrtSession.Result results = session.run(inputs);
+//
+//        // Extract and convert the output to a probability
+//        // Adjust this part based on your model's specific output format
+//        float[][] output = (float[][]) results.get(0).getValue();
+//        return convertToProbability(output);
+        return (float) Math.random();
     }
 
     private Map<String, OnnxTensor> preprocess(String text) throws Exception {
