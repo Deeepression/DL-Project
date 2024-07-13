@@ -22,10 +22,10 @@ public class DLModel {
 
     public DLModel() throws IOException, ModelException {
         this.model = Model.newInstance("bert-base-uncased");
-        this.model.load(Paths.get("/Users/user/Documents/GitHub/DL-Project/src/main/resources/scripted_model.pt"));
+        this.model.load(Paths.get("src/main/resources/model.pt"));
 
         this.tokenizer = HuggingFaceTokenizer.builder()
-                .optTokenizerPath(Paths.get("/Users/user/Documents/GitHub/DL-Project/src/main/resources/tokenizer/tokenizer.json"))
+                .optTokenizerPath(Paths.get("src/main/resources/tokenizer/tokenizer.json"))
                 .build();
     }
 
