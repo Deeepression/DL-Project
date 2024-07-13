@@ -1,5 +1,6 @@
 package com.coreApplication.Controllers;
 
+import com.coreApplication.Exceptions.PatientNotFoundException;
 import com.coreApplication.Model.Patient;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,14 @@ public class PatientController {
         patient.setId(nextId++);
         patients.add(patient);
         return patient;
+    }
+
+    @GetMapping("/{id}")
+    public Patient getPatient(@PathVariable Long id) {
+        return patients.stream()
+                .filter(p -> p.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new PatientNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
