@@ -19,7 +19,7 @@ public class DLModelTest {
     }
     @Test
     public void testModal() throws Exception {
-        String inputText = "i want to kill my self";
+        String inputText = "i want to kill myself";
         float prediction = model.predict(inputText);
         System.out.println("the model prediction is: " + prediction);
     }
