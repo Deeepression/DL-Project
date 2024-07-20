@@ -12,7 +12,7 @@ public class DLModel {
     public float predict(String text) {
         try {
             // Create Virtual Environment and install required packages if not already installed
-            String command = "/bin/zsh -c \"source /Users/user/PycharmProjects/pythonProject/venv/bin/activate && python /Users/user/PycharmProjects/pythonProject/example.py \\\"" + text.replace("\"", "\\\"") + "\\\"\"";
+            String command = "/bin/zsh -c \"source /Users/user/PycharmProjects/pythonProject/venv/bin/activate && python src/main/python/modelPredictionScript.txt \\\"" + text.replace("\"", "\\\"") + "\\\"\"";
 
             ProcessBuilder pb = new ProcessBuilder("/bin/zsh", "-c", command);
             Process p = pb.start();

@@ -1,0 +1,51 @@
+import torch
+from torch import nn
+from transformers import BertModel, BertTokenizer
+
+
+class CustomClassifier(nn.Module):
+    def __init__(self):
+        super(CustomClassifier, self).__init__()
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.dropout = nn.Dropout(0.1)
+        self.dense_layer = nn.Linear(768, 256)
+        self.output_layer = nn.Linear(256, 1)
+
+    def forward(self, input_ids, attention_mask):
+        outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        pooled_output = outputs.pooler_output
+        pooled_output = self.dropout(pooled_output)
+        dense_output = self.dense_layer(pooled_output)
+        output = self.output_layer(dense_output)
+        return output
+
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+_model = CustomClassifier()
+_model.to(device)
+
+_model.load_state_dict(torch.load('/Users/user/Downloads/model_weights.pth', map_location=device))
+_model.eval()
+
+_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+
+
+def predict_custom_string(model, tokenizer, text):
+    model.eval()
+    encoded_input = tokenizer(text, padding=True, truncation=True, max_length=128, return_tensors='pt')
+    input_ids = encoded_input['input_ids'].to(device)
+    attention_mask = encoded_input['attention_mask'].to(device)
+    with torch.no_grad():
+        output = model(input_ids, attention_mask)
+    pred = torch.sigmoid(output).cpu().numpy()
+    return pred[0][0]
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: python example.py '<input_string>'")
+        sys.exit(1)
+    input_text = sys.argv[1]
+    prediction = predict_custom_string(_model, _tokenizer, input_text)
+    print(f'{prediction:.4f}')
