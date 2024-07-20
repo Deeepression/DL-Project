@@ -1,57 +1,39 @@
 package com.coreApplication.Model;
 
-import ai.onnxruntime.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-
-import static ai.onnxruntime.OrtEnvironment.getEnvironment;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class DLModel {
 
-    private final OrtEnvironment env;
-    private final OrtSession session;
-
-    public DLModel() throws Exception {
-        // Initialize the environment and session for ONNX Runtime
-        env = getEnvironment();
-        session = env.createSession(Files.readAllBytes(Paths.get("src/main/resources/model.onnx")));
+    public DLModel() {
     }
 
-    public float predict(String text) throws Exception {
-        // Preprocess the text to convert it into a format suitable for your model
-        // This includes tokenization and encoding similar to the Python function
-//        Map<String, OnnxTensor> inputs = preprocess(text);
-//
-//        // Run the model
-//        OrtSession.Result results = session.run(inputs);
-//
-//        // Extract and convert the output to a probability
-//        // Adjust this part based on your model's specific output format
-//        float[][] output = (float[][]) results.get(0).getValue();
-//        return convertToProbability(output);
-        return (float) Math.random();
-    }
+    public float predict(String text) {
+        try {
+            // Create Virtual Environment and install required packages if not already installed
+            String command = "/bin/zsh -c \"source /Users/user/PycharmProjects/pythonProject/venv/bin/activate && python /Users/user/PycharmProjects/pythonProject/example.py \\\"" + text.replace("\"", "\\\"") + "\\\"\"";
 
-    private Map<String, OnnxTensor> preprocess(String text) throws Exception {
-        // Implement preprocessing of the text here
-        // This should include tokenization and encoding similar to the Python function
-        // The following is a placeholder example
-        long[][] inputIds = {/* tokenized and encoded text */};
-        long[][] attentionMask = {/* attention mask for the input */};
+            ProcessBuilder pb = new ProcessBuilder("/bin/zsh", "-c", command);
+            Process p = pb.start();
 
-        Map<String, OnnxTensor> inputs = new HashMap<>();
-        inputs.put("input_ids", OnnxTensor.createTensor(env, inputIds));
-        inputs.put("attention_mask", OnnxTensor.createTensor(env, attentionMask));
-
-        return inputs;
-    }
-    
-    private float convertToProbability(float[][] output) {
-        // Implement the conversion of model output to a probability
-        // This can vary based on the model's output format
-        // The following is a placeholder example
-        return output[0][0];
+            int exitCode = p.waitFor();
+            if (exitCode == 0) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String output = in.readLine();
+                if (output != null) {
+                    return Float.parseFloat(output.trim());
+                } else {
+                    System.err.println("No output from the Python script.");
+                    return -1;
+                }
+            } else {
+                System.err.println("Python script execution failed with exit code " + exitCode);
+                return -1;
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 }
