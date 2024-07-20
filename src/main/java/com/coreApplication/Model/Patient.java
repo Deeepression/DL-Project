@@ -16,5 +16,6 @@ public class Patient {
     private int age;
     private String notes;
     private String socialMediaLink;
+    private String generalStatus = "GOOD";
     private List<Post> posts = new ArrayList<>();
 }
