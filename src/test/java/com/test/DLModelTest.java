@@ -11,9 +11,7 @@ public class DLModelTest {
         try {
             tempModel = new DLModel();
         } catch (Exception e) {
-            // Log the error or handle it as per your application's error handling policy
             e.printStackTrace();
-            // Consider setting tempModel to a default state or using a fallback strategy
         }
         model = tempModel;
     }
