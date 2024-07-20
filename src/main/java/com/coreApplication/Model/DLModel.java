@@ -12,13 +12,13 @@ public class DLModel {
     }
 
     private void setupVirtualEnvironment() {
-        String venvPath = "/Users/user/PycharmProjects/pythonProject/venv";
+        String venvPath = "src/main/python/venv";
         File venvDir = new File(venvPath);
         if (!venvDir.exists()) {
             try {
                 // Create the virtual environment
                 ProcessBuilder venvBuilder = new ProcessBuilder("/bin/zsh", "-c", "python3 -m venv " + venvPath);
-                venvBuilder.directory(new File("/Users/user/PycharmProjects/pythonProject"));
+                venvBuilder.directory(new File("/"));
                 venvBuilder.start().waitFor();
 
                 // Install required packages
@@ -35,7 +35,7 @@ public class DLModel {
 
     public float predict(String text) {
         try {
-            String command = "/bin/zsh -c \"source /Users/user/PycharmProjects/pythonProject/venv/bin/activate && python src/main/python/modelPredictionScript.txt \\\"" + text.replace("\"", "\\\"") + "\\\"\"";
+            String command = "/bin/zsh -c \"source src/main/python/venv/bin/activate && python src/main/python/modelPredictionScript.txt \\\"" + text.replace("\"", "\\\"") + "\\\"\"";
 
             ProcessBuilder pb = new ProcessBuilder("/bin/zsh", "-c", command);
             Process p = pb.start();

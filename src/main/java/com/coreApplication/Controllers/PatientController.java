@@ -70,4 +70,8 @@ public class PatientController {
         patient.getPosts().add(post);
         return patient;
     }
+
+    public Patient getPatientById(Long id) {
+        return getPatient(id);
+    }
 }

@@ -11,5 +11,6 @@ public class Post {
     private Long id;
     private String source;
     private String text;
+    private String date;
     private float prediction;
 }
