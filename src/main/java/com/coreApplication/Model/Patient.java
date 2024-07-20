@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,4 +16,5 @@ public class Patient {
     private int age;
     private String notes;
     private String socialMediaLink;
+    private List<Post> posts = new ArrayList<>();
 }
