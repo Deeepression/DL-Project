@@ -39,7 +39,7 @@ public class DLModel {
 
     private static Process getProcess(String text) throws IOException {
         // In Order to run the virtual environment:
-        // 1. In the console write the following:
+        // 1. In the console write the following commands:
         // a. python3 -m venv venv    
         // b. source venv/bin/activate
         // c. pip install torch transformers
