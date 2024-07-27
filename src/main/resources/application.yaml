@@ -1,0 +1,6 @@
+
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://raphaelhazout:Rephael159@cluster0.9oxnutl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0

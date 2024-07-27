@@ -3,72 +3,67 @@ package com.coreApplication.Controllers;
 import com.coreApplication.Exceptions.PatientNotFoundException;
 import com.coreApplication.Model.Patient;
 import com.coreApplication.Model.Post;
+import com.coreApplication.Repositories.PatientRepository;
+import com.coreApplication.Repositories.PostRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/patients")
 @CrossOrigin(origins = "http://localhost:3000")
 public class PatientController {
 
-    private final List<Patient> patients = new ArrayList<>();
-    private final List<Post> posts = new ArrayList<>(); // Assuming a global posts list for simplicity
-    private Long nextPatientId = 1L;
-    private Long nextPostId = 1L;
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping
     public List<Patient> getAllPatients() {
-        return patients;
+        return patientRepository.findAll();
     }
 
     @PostMapping
     public Patient addPatient(@RequestBody Patient patient) {
-        patient.setId(nextPatientId++);
-        patients.add(patient);
-        return patient;
+        return patientRepository.save(patient);
     }
 
     @GetMapping("/{id}")
     public Patient getPatient(@PathVariable Long id) {
-        return patients.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new PatientNotFoundException(id));
+        return patientRepository.findById(id).orElseThrow(() -> new PatientNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
     public void deletePatient(@PathVariable Long id) {
-        patients.removeIf(patient -> patient.getId().equals(id));
+        patientRepository.deleteById(id);
     }
 
     @PostMapping("/{patientId}/posts")
     public Patient addPostToPatient(@PathVariable Long patientId, @RequestBody Post post) {
         Patient patient = getPatient(patientId);
-        post.setId(nextPostId++);
+        postRepository.save(post);
         patient.getPosts().add(post);
-        posts.add(post);
-        return patient;
+        return patientRepository.save(patient);
     }
 
     @DeleteMapping("/{patientId}/posts/{postId}")
     public Patient deletePostFromPatient(@PathVariable Long patientId, @PathVariable Long postId) {
         Patient patient = getPatient(patientId);
         patient.getPosts().removeIf(post -> post.getId().equals(postId));
-        posts.removeIf(post -> post.getId().equals(postId));
-        return patient;
+        postRepository.deleteById(postId);
+        return patientRepository.save(patient);
     }
 
     @PostMapping("/{patientId}/posts/{postId}")
     public Patient addPostByIdToPatient(@PathVariable Long patientId, @PathVariable Long postId) {
         Patient patient = getPatient(patientId);
-        Post post = posts.stream()
-                .filter(p -> p.getId().equals(postId))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Post not found with ID: " + postId));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found with ID: " + postId));
         patient.getPosts().add(post);
-        return patient;
+        return patientRepository.save(patient);
     }
 
     public Patient getPatientById(Long id) {
