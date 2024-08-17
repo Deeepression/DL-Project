@@ -94,8 +94,8 @@ public class Scraping {
     } finally {
       // Close the browser
       driver.quit();
-      return postList;
     }
+    return postList;
   }
 
 
@@ -105,7 +105,7 @@ public class Scraping {
     List<String> postList = scraping.scrapePatient(urlToPatient);
     System.out.println("\n\n Post list for: " + patient);
     System.out.println("---------------------------------------------------" + "\n");
-    postList.forEach(p -> System.out.println("post " + postCounter++ + ": " + p.toString() + "\n"));
+    postList.forEach(p -> System.out.println("post " + postCounter++ + ": " + p + "\n"));
     System.out.println("Total posts: " + (postCounter - 1));
   }
 }
