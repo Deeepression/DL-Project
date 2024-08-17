@@ -9,7 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/patients")
@@ -59,12 +62,26 @@ public class PatientController {
     }
 
     @PostMapping("/{patientId}/posts/{postId}")
-    public Patient addPostByIdToPatient(@PathVariable String patientId, @PathVariable String postId) {
+    public Patient addOrUpdatePostByIdToPatient(@PathVariable String patientId, @PathVariable String postId) {
+        // Fetch the Patient
         Patient patient = getPatient(patientId);
-        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found with ID: " + postId));
-        patient.getPosts().add(post);
+
+        // Fetch the Post
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with ID: " + postId));
+
+        // Replace the existing post with the same ID or add the new post
+        List<Post> updatedPosts = new ArrayList<>(patient.getPosts());
+        updatedPosts.removeIf(existingPost -> existingPost.getId().equals(postId)); // Remove the existing post if present
+        updatedPosts.add(post); // Add the new post
+
+        // Set the new list on the patient
+        patient.setPosts(updatedPosts);
+
+        // Save the updated patient
         return patientRepository.save(patient);
     }
+
 
     public Patient getPatientById(String id) {
         return getPatient(id);

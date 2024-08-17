@@ -2,6 +2,7 @@ package com.coreApplication.Controllers;
 
 import com.coreApplication.Exceptions.PostNotFoundException;
 import com.coreApplication.Model.DLModel;
+import com.coreApplication.Model.Patient;
 import com.coreApplication.Model.Post;
 import com.coreApplication.Repositories.PostRepository;
 import com.coreApplication.Utils.PredictionRequest;
@@ -30,12 +31,14 @@ class PredictionController {
         return new PredictionResponse(prediction);
     }
 
-    @GetMapping("/post/{postId}")
-    public Post predictPostById(@PathVariable String postId) {
+    @GetMapping("/post/{patientId}/{postId}")
+    public Post predictPostById(@PathVariable String patientId, @PathVariable String postId) {
         Post post =  postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
         String postContent = post.getText();
         double predictionScore = predict(new PredictionRequest(postContent)).getScore();
         post.setPrediction((float) predictionScore);
-        return postRepository.save(post);
+        postRepository.save(post);
+        patientController.addOrUpdatePostByIdToPatient(patientId, postId);
+        return post;
     }
 }
