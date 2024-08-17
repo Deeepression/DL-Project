@@ -15,7 +15,7 @@ import java.util.List;
 @Document(collection = "patients")
 public class Patient {
     @Id
-    private Long id;
+    private String id;
     private String patientName;
     private int age;
     private String notes;
