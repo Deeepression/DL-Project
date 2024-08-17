@@ -22,4 +22,18 @@ public class Patient {
     private String socialMediaLink;
     private String generalStatus = "GOOD";
     private List<Post> posts = new ArrayList<>();
+
+    public void updateGeneralStatus() {
+        double averageScore = this.getPosts().stream().mapToDouble(Post::getPrediction).average().orElse(0) *  100;
+        String status;
+        if (averageScore > 60) {
+            status = "BAD";
+        } else if (averageScore > 30) {
+            status = "MEDIUM";
+        } else {
+            status = "GOOD";
+        }
+
+        this.generalStatus = status;
+    }
 }

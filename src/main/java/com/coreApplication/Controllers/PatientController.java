@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -50,6 +49,7 @@ public class PatientController {
         Patient patient = getPatient(patientId);
         postRepository.save(post);
         patient.getPosts().add(post);
+        patient.updateGeneralStatus();
         return patientRepository.save(patient);
     }
 
@@ -57,6 +57,7 @@ public class PatientController {
     public Patient deletePostFromPatient(@PathVariable String patientId, @PathVariable String postId) {
         Patient patient = getPatient(patientId);
         patient.getPosts().removeIf(post -> post.getId().equals(postId));
+        patient.updateGeneralStatus();
         postRepository.deleteById(postId);
         return patientRepository.save(patient);
     }
@@ -77,7 +78,7 @@ public class PatientController {
 
         // Set the new list on the patient
         patient.setPosts(updatedPosts);
-
+        patient.updateGeneralStatus();
         // Save the updated patient
         return patientRepository.save(patient);
     }
