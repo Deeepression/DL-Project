@@ -65,6 +65,8 @@ public class Scraping {
       passwordButton.click();
 
       // Click on ad-cancel button
+      adCancelButton = wait.until(ExpectedConditions.elementToBeClickable(
+          By.xpath("//*[@data-testid='xMigrationBottomBar']")));
       adCancelButton.click();
 
       //Navigate to patient profile
@@ -72,7 +74,8 @@ public class Scraping {
 
       //find the username element of the patient by xpath
       WebElement usernamePatientElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
-          By.xpath("//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]")));
+          By.xpath(
+              "//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]")));
       String usernamePatient = usernamePatientElement.getText();
 
       //find the amount of posts element by xpath
@@ -84,7 +87,8 @@ public class Scraping {
       //change 5 to postAmount
       for (int i = 1; i <= 5; i++) {
         postElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='" + usernamePatient.toLowerCase()
+            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
+                + usernamePatient.toLowerCase()
                 + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)["
                 + i + "]")));
         postList.add(postElement.getText());
