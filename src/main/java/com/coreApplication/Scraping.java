@@ -20,7 +20,6 @@ public class Scraping {
   private static final int timeOutInSeconds = 5;
   private static int postCounter = 1;
   WebElement postElement, postDateElement;
-  Post tempPost;
   List<Post> postList = new ArrayList<>();
 
   public List<Post> scrapePatient(String url) {
