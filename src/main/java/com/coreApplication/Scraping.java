@@ -86,8 +86,7 @@ public class Scraping {
       int postAmount = Integer.parseInt(postElementAmount.getText().split(" ")[0]);
 
       // Find the post list element by xpath and print the posts
-      //change 5 to postAmount
-      for (int i = 1; i <= 5; i++) {
+      for (int i = 1; i <= postAmount; i++) {
         postElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
             "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
                 + usernamePatient.toLowerCase()
