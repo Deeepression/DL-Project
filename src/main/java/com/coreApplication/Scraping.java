@@ -39,43 +39,43 @@ public class Scraping {
       WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds);
 
       // Find the ad-cancel button element by xpath and click it
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement adCancelButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("//*[@data-testid='xMigrationBottomBar']")));
       adCancelButton.click();
 
       // Find the sign-in button element by xpath and click it
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement signInButton = wait.until(
           ExpectedConditions.elementToBeClickable(By.xpath("//*[@data-testid='loginButton']")));
       signInButton.click();
 
       // Find the username input element by xpath and enter the username
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement usernameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath("//input[@autocomplete='username']")));
       usernameInput.sendKeys(userNameAccountX);
 
       // Find the username button element by xpath and click it
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement usernameButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("//*[@id=\"react-root\"]//span[contains(text(),'Next')]/ancestor::button")));
       usernameButton.click();
 
       // Find the password input element by xpath and enter the password
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement passwordInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath("//*[@id=\"react-root\"]//input[@name='password']")));
       passwordInput.sendKeys(userPasswordAccountX);
 
       // Find the password button element by xpath and click it
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement passwordButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("(//button[@data-testid='LoginForm_Login_Button'])[1]")));
       passwordButton.click();
 
       // Click on ad-cancel button
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       adCancelButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("//*[@data-testid='xMigrationBottomBar']")));
       adCancelButton.click();
@@ -84,28 +84,26 @@ public class Scraping {
       driver.navigate().to(url);
 
       //find the username element of the patient by xpath
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement usernamePatientElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath(
               "//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]")));
       String usernamePatient = usernamePatientElement.getText();
 
       //find the amount of posts element by xpath
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
+      waitForBrowser();
       WebElement postElementAmount = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath("//main//div[@data-testid='primaryColumn']//div[contains(text(),'posts')]")));
       int postAmount = Integer.parseInt(postElementAmount.getText().split(" ")[0]);
 
       // Find the post list element by xpath and print the posts
       for (int i = 1; i <= postAmount; i++) {
-        Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
         postElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
             "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
                 + usernamePatient.toLowerCase()
                 + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)["
                 + i + "]")));
 
-        Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(3));
         postDateElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
             "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
                 + usernamePatient.toLowerCase()
@@ -128,6 +126,13 @@ public class Scraping {
     return postList;
   }
 
+  public void waitForBrowser(){
+    try {
+      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(2));
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public static void main(String[] args) {
     String urlToPatient = "https://x.com/Deepression_AI";
