@@ -1,5 +1,6 @@
 package com.coreApplication;
 
+import com.coreApplication.Model.Post;
 import java.util.ArrayList;
 import java.util.List;
 import org.openqa.selenium.By;
@@ -18,10 +19,11 @@ public class Scraping {
   private static final String urlToX = "https://www.X.com";
   private static final int timeOutInSeconds = 60;
   private static int postCounter = 1;
-  WebElement postElement;
-  List<String> postList = new ArrayList<>();
+  WebElement postElement,postDateElement;
+  Post tempPost;
+  List<Post> postList = new ArrayList<>();
 
-  public List<String> scrapePatient(String url) {
+  public List<Post> scrapePatient(String url) {
 
     // Initialize the ChromeDriver
     ChromeOptions options = new ChromeOptions();
@@ -65,6 +67,8 @@ public class Scraping {
       passwordButton.click();
 
       // Click on ad-cancel button
+      adCancelButton = wait.until(ExpectedConditions.elementToBeClickable(
+          By.xpath("//*[@data-testid='xMigrationBottomBar']")));
       adCancelButton.click();
 
       //Navigate to patient profile
@@ -72,7 +76,8 @@ public class Scraping {
 
       //find the username element of the patient by xpath
       WebElement usernamePatientElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
-          By.xpath("//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]")));
+          By.xpath(
+              "//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]")));
       String usernamePatient = usernamePatientElement.getText();
 
       //find the amount of posts element by xpath
@@ -84,10 +89,22 @@ public class Scraping {
       //change 5 to postAmount
       for (int i = 1; i <= 5; i++) {
         postElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='" + usernamePatient.toLowerCase()
+            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
+                + usernamePatient.toLowerCase()
                 + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)["
                 + i + "]")));
-        postList.add(postElement.getText());
+
+        postDateElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
+                + usernamePatient.toLowerCase()
+                + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText'])["
+                + i + "]/parent::div/parent::div//time")));
+
+        tempPost = new Post();
+        tempPost.setSource("Twitter");
+        tempPost.setText(postElement.getText());
+        tempPost.setDate(postDateElement.getAttribute("datetime"));
+        postList.add(tempPost);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -102,7 +119,7 @@ public class Scraping {
   public static void main(String[] args) {
     String urlToPatient = "https://x.com/Deepression_AI";
     Scraping scraping = new Scraping();
-    List<String> postList = scraping.scrapePatient(urlToPatient);
+    List<Post> postList = scraping.scrapePatient(urlToPatient);
     System.out.println("\n\n Post list for: " + patient);
     System.out.println("---------------------------------------------------" + "\n");
     postList.forEach(p -> System.out.println("post " + postCounter++ + ": " + p + "\n"));
