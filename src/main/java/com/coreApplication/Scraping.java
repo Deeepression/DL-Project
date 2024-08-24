@@ -19,7 +19,7 @@ public class Scraping {
   private static final String urlToX = "https://www.X.com";
   private static final int timeOutInSeconds = 60;
   private static int postCounter = 1;
-  WebElement postElement,postDateElement;
+  WebElement postElement, postDateElement;
   Post tempPost;
   List<Post> postList = new ArrayList<>();
 
@@ -99,12 +99,12 @@ public class Scraping {
                 + usernamePatient.toLowerCase()
                 + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText'])["
                 + i + "]/parent::div/parent::div//time")));
-
-        tempPost = new Post();
-        tempPost.setSource("Twitter");
-        tempPost.setText(postElement.getText());
-        tempPost.setDate(postDateElement.getAttribute("datetime"));
-        postList.add(tempPost);
+        postList.add(
+            Post.builder()
+                .source("Twitter")
+                .text(postElement.getText())
+                .date(postDateElement.getAttribute("datetime"))
+                .build());
       }
     } catch (Exception e) {
       e.printStackTrace();
