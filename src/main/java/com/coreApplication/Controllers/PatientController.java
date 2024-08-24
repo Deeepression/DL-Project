@@ -5,6 +5,7 @@ import com.coreApplication.Model.Patient;
 import com.coreApplication.Model.Post;
 import com.coreApplication.Repositories.PatientRepository;
 import com.coreApplication.Repositories.PostRepository;
+import com.coreApplication.Scraping;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,8 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class PatientController {
 
+    @Autowired
+    private PredictionController predictionController;
     @Autowired
     private PatientRepository patientRepository;
 
@@ -51,6 +54,28 @@ public class PatientController {
         patient.getPosts().add(post);
         patient.updateGeneralStatus();
         return patientRepository.save(patient);
+    }
+
+    @GetMapping("/{patientId}/fetchPosts")
+    public Patient fetchPostsForPatient(@PathVariable String patientId) {
+        var patient = getPatient(patientId);
+        var socialUrl = patient.getSocialMediaLink();
+
+        var scraping = new Scraping();
+        var scrapedPosts = scraping.scrapePatient(socialUrl);
+
+        var postList = createAndSavePosts(scrapedPosts, patientId);
+        patient.setPosts(postList);
+        return patientRepository.save(patient);
+    }
+
+    private List<Post> createAndSavePosts(List<Post> scrapedPosts, String patientId) {
+        List<Post> postList = new ArrayList<>();
+        for (Post postContent : scrapedPosts) {
+            predictionController.setPredictionAsync(postContent);
+            postList.add(postContent);
+        }
+        return postList;
     }
 
     @DeleteMapping("/{patientId}/posts/{postId}")
