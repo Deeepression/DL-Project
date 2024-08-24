@@ -2,14 +2,13 @@ package com.coreApplication.Controllers;
 
 import com.coreApplication.Exceptions.PostNotFoundException;
 import com.coreApplication.Model.DLModel;
-import com.coreApplication.Model.Patient;
 import com.coreApplication.Model.Post;
 import com.coreApplication.Repositories.PostRepository;
 import com.coreApplication.Utils.PredictionRequest;
 import com.coreApplication.Utils.PredictionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/predictions")
@@ -33,12 +32,16 @@ class PredictionController {
 
     @GetMapping("/post/{patientId}/{postId}")
     public Post predictPostById(@PathVariable String patientId, @PathVariable String postId) {
-        Post post =  postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
-        String postContent = post.getText();
-        double predictionScore = predict(new PredictionRequest(postContent)).getScore();
-        post.setPrediction((float) predictionScore);
-        postRepository.save(post);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
+        setPredictionAsync(post);
         patientController.addOrUpdatePostByIdToPatient(patientId, postId);
         return post;
+    }
+
+    public void setPredictionAsync(Post post) {
+        String postContent = post.getText();
+        float prediction = model.predict(postContent);
+        post.setPrediction(prediction);
+        postRepository.save(post);
     }
 }
