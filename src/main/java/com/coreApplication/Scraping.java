@@ -1,7 +1,6 @@
 package com.coreApplication;
 
 import com.coreApplication.Model.Post;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import org.openqa.selenium.By;
@@ -10,7 +9,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Sleeper;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Scraping {
@@ -19,7 +17,7 @@ public class Scraping {
   private static final String userPasswordAccountX = "Kobikobi20";
   private static final String patient = "Deepression_AI";
   private static final String urlToX = "https://www.X.com";
-  private static final int timeOutInSeconds = 60;
+  private static final int timeOutInSeconds = 5;
   private static int postCounter = 1;
   WebElement postElement, postDateElement;
   Post tempPost;
@@ -39,43 +37,36 @@ public class Scraping {
       WebDriverWait wait = new WebDriverWait(driver, timeOutInSeconds);
 
       // Find the ad-cancel button element by xpath and click it
-      waitForBrowser();
       WebElement adCancelButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("//*[@data-testid='xMigrationBottomBar']")));
       adCancelButton.click();
 
       // Find the sign-in button element by xpath and click it
-      waitForBrowser();
       WebElement signInButton = wait.until(
           ExpectedConditions.elementToBeClickable(By.xpath("//*[@data-testid='loginButton']")));
       signInButton.click();
 
       // Find the username input element by xpath and enter the username
-      waitForBrowser();
       WebElement usernameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath("//input[@autocomplete='username']")));
       usernameInput.sendKeys(userNameAccountX);
 
       // Find the username button element by xpath and click it
-      waitForBrowser();
       WebElement usernameButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("//*[@id=\"react-root\"]//span[contains(text(),'Next')]/ancestor::button")));
       usernameButton.click();
 
       // Find the password input element by xpath and enter the password
-      waitForBrowser();
       WebElement passwordInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath("//*[@id=\"react-root\"]//input[@name='password']")));
       passwordInput.sendKeys(userPasswordAccountX);
 
       // Find the password button element by xpath and click it
-      waitForBrowser();
       WebElement passwordButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("(//button[@data-testid='LoginForm_Login_Button'])[1]")));
       passwordButton.click();
 
       // Click on ad-cancel button
-      waitForBrowser();
       adCancelButton = wait.until(ExpectedConditions.elementToBeClickable(
           By.xpath("//*[@data-testid='xMigrationBottomBar']")));
       adCancelButton.click();
@@ -84,32 +75,33 @@ public class Scraping {
       driver.navigate().to(url);
 
       //find the username element of the patient by xpath
-      waitForBrowser();
       WebElement usernamePatientElement = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath(
               "//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]")));
       String usernamePatient = usernamePatientElement.getText();
 
       //find the amount of posts element by xpath
-      waitForBrowser();
       WebElement postElementAmount = wait.until(ExpectedConditions.visibilityOfElementLocated(
           By.xpath("//main//div[@data-testid='primaryColumn']//div[contains(text(),'posts')]")));
       int postAmount = Integer.parseInt(postElementAmount.getText().split(" ")[0]);
 
       // Find the post list element by xpath and print the posts
-      for (int i = 1; i <= postAmount; i++) {
-        postElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
-                + usernamePatient.toLowerCase()
-                + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)["
-                + i + "]")));
+      for (int i = 0; i <= postAmount; i++) {
+        try {
+          postElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+              "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
+                  + usernamePatient.toLowerCase()
+                  + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)["
+                  + i + "]")));
 
-        postDateElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
-            "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
-                + usernamePatient.toLowerCase()
-                + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText'])["
-                + i + "]/parent::div/parent::div//time")));
-
+          postDateElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(
+              "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
+                  + usernamePatient.toLowerCase()
+                  + "']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText'])["
+                  + i + "]/parent::div/parent::div//time")));
+        } catch (Exception e) {
+          continue;
+        }
         postList.add(
             Post.builder()
                 .source("Twitter")
@@ -124,14 +116,6 @@ public class Scraping {
       driver.quit();
     }
     return postList;
-  }
-
-  public void waitForBrowser(){
-    try {
-      Sleeper.SYSTEM_SLEEPER.sleep(Duration.ofSeconds(2));
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public static void main(String[] args) {
