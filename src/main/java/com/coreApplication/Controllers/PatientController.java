@@ -64,14 +64,29 @@ public class PatientController {
         var scraping = new Scraping();
         var scrapedPosts = scraping.scrapePatient(socialUrl);
 
-        var postList = createAndSavePosts(scrapedPosts, patientId);
-        patient.setPosts(postList);
+        var newPosts = filterNewPosts(patient.getPosts(), scrapedPosts);
+        var postList = createAndSavePosts(newPosts, patientId);
+        patient.getPosts().addAll(postList);
+        patient.updateGeneralStatus();
         return patientRepository.save(patient);
     }
 
-    private List<Post> createAndSavePosts(List<Post> scrapedPosts, String patientId) {
+    private List<Post> filterNewPosts(List<Post> existingPosts, List<Post> scrapedPosts) {
+        List<Post> newPosts = new ArrayList<>();
+        for (Post scrapedPost : scrapedPosts) {
+            boolean isNew = existingPosts.stream()
+                    .noneMatch(existingPost -> existingPost.getText().equals(scrapedPost.getText()) &&
+                            existingPost.getDate().equals(scrapedPost.getDate()));
+            if (isNew) {
+                newPosts.add(scrapedPost);
+            }
+        }
+        return newPosts;
+    }
+
+    private List<Post> createAndSavePosts(List<Post> newPosts, String patientId) {
         List<Post> postList = new ArrayList<>();
-        for (Post postContent : scrapedPosts) {
+        for (Post postContent : newPosts) {
             predictionController.setPredictionAsync(postContent);
             postList.add(postContent);
         }
