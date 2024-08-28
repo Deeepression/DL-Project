@@ -120,8 +120,8 @@ public class Scraping {
 
         } catch (Exception e) {
           html.sendKeys(Keys.chord(Keys.PAGE_DOWN));
-          i--;
           System.err.println("Failed to retrieve post " + i + ": " + e.getMessage() + "\n");
+          i--;
         }
       }
     } catch (Exception e) {
