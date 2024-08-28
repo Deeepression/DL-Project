@@ -1,13 +1,13 @@
 package com.coreApplication.Model;
 
+import lombok.NoArgsConstructor;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+@NoArgsConstructor
 public class DLModel {
-
-    public DLModel() {
-    }
 
     public float predict(String text) {
         try {
