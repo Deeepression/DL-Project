@@ -115,14 +115,13 @@ public class Scraping {
           String postDateXPath = String.format(POST_DATE_XPATH, usernamePatient, i);
 
           System.out.println("Retrieving post " + i + "...\n");
-          retrievePost(waitPerPost, postTextXPath, postDateXPath, i);
+          retrievePost(waitPerPost, postTextXPath, postDateXPath);
+          System.out.println("Post " + i + " retrieved.\n");
 
         } catch (Exception e) {
-          String postTextXPath = String.format(POST_TEXT_XPATH, usernamePatient, i);
-          String postDateXPath = String.format(POST_DATE_XPATH, usernamePatient, i);
           html.sendKeys(Keys.chord(Keys.PAGE_DOWN));
-          retrievePost(waitPerPost, postTextXPath, postDateXPath, i);
           System.err.println("Failed to retrieve post " + i + ": " + e.getMessage() + "\n");
+          i--;
         }
       }
     } catch (Exception e) {
@@ -136,7 +135,7 @@ public class Scraping {
     return postList;
   }
 
-  private void retrievePost(WebDriverWait waitPerPost, String postTextXPath, String postDateXPath, int postNumber) {
+  private void retrievePost(WebDriverWait waitPerPost, String postTextXPath, String postDateXPath) {
     WebElement postElement = waitPerPost.until(
         ExpectedConditions.visibilityOfElementLocated(By.xpath(postTextXPath)));
     WebElement postDateElement = waitPerPost.until(
@@ -147,8 +146,6 @@ public class Scraping {
         .text(postElement.getText())
         .date(postDateElement.getAttribute("datetime"))
         .build());
-
-    System.out.println("Post " + postNumber + " retrieved.\n");
   }
 
   public static void main(String[] args) {
