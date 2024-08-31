@@ -16,6 +16,7 @@ public class Scraping {
 
   private static final String USERNAME_ACCOUNT_X = "deepression_ai";
   private static final String PASSWORD_ACCOUNT_X = "Kobikobi20";
+  private static final String EMAIL_ACCOUNT_X = "deepression.ai@gmail.com";
   private static final String PATIENT = "Deepression_AI";
   private static final String URL_TO_X = "https://www.x.com";
   private static final int TIMEOUT_IN_SECONDS = 30;
@@ -30,6 +31,8 @@ public class Scraping {
   private static final String USERNAME_BUTTON_XPATH = "//*[@id='react-root']//span[contains(text(),'Next')]/ancestor::button";
   private static final String PASSWORD_INPUT_XPATH = "//*[@id='react-root']//input[@name='password']";
   private static final String PASSWORD_BUTTON_XPATH = "(//button[@data-testid='LoginForm_Login_Button'])[1]";
+  private static final String UNUSUAL_LOGIN_INPUT_XPATH = "//input[@data-testid='ocfEnterTextTextInput']";
+  private static final String UNUSUAL_LOGIN_BUTTON_XPATH = "//button[@data-testid='ocfEnterTextNextButton']";
   private static final String USERNAME_PATIENT_XPATH = "//main//div[@data-testid='primaryColumn']//div[@data-testid='UserName']//span[contains(text(),'@')]";
   private static final String POST_AMOUNT_XPATH = "//main//div[@data-testid='primaryColumn']//div[contains(text(),'posts')]";
   private static final String POST_TEXT_XPATH = "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='%s']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)[%d]";
@@ -73,6 +76,17 @@ public class Scraping {
           ExpectedConditions.elementToBeClickable(By.xpath(USERNAME_BUTTON_XPATH)));
       usernameButton.click();
 
+      try{
+        System.out.println("Unusual login - Enter email: " + EMAIL_ACCOUNT_X + "...\n");
+        WebElement unusualLogin = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UNUSUAL_LOGIN_INPUT_XPATH)));
+        unusualLogin.sendKeys(EMAIL_ACCOUNT_X);
+
+        System.out.println("Clicking 'Next' button...\n");
+        WebElement unusualLoginButton = wait.until(
+            ExpectedConditions.elementToBeClickable(By.xpath(UNUSUAL_LOGIN_BUTTON_XPATH)));
+        unusualLoginButton.click();
+      }catch (Exception e){e.printStackTrace();}
+
       System.out.println("Entering password...\n");
       WebElement passwordInput = wait.until(
           ExpectedConditions.visibilityOfElementLocated(By.xpath(PASSWORD_INPUT_XPATH)));
@@ -102,16 +116,9 @@ public class Scraping {
 
       System.out.println("Waiting for post amount to be visible...\n");
       String postAmountString = wait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(POST_AMOUNT_XPATH))).getText().split(" ")[0];
-      if(postAmountString.contains("K")){
-        postAmountString = postAmountString.replace("K","");
-        postAmountDouble = Double.parseDouble(postAmountString) * 1000;
-      } else if (postAmountString.contains(",")) {
-        postAmountString = postAmountString.replace(",","");
-        postAmountDouble = Double.parseDouble(postAmountString);
-      }else postAmountDouble = Double.parseDouble(postAmountString);
-      postAmount = (int)postAmountDouble;
-      System.out.println("Total posts: " + postAmount + "\n");
+              ExpectedConditions.visibilityOfElementLocated(By.xpath(POST_AMOUNT_XPATH))).getText()
+          .split(" ")[0];
+      postAmount = convertToPostAmount(postAmountString);
 
       WebElement html = driver.findElement(By.tagName("html"));
       //html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
@@ -156,8 +163,23 @@ public class Scraping {
         .build());
   }
 
+  public int convertToPostAmount(String postAmountString) {
+    if (postAmountString.contains("K")) {
+      postAmountString = postAmountString.replace("K", "");
+      postAmountDouble = Double.parseDouble(postAmountString) * 1000;
+    } else if (postAmountString.contains(",")) {
+      postAmountString = postAmountString.replace(",", "");
+      postAmountDouble = Double.parseDouble(postAmountString);
+    } else {
+      postAmountDouble = Double.parseDouble(postAmountString);
+    }
+    postAmount = (int) postAmountDouble;
+    System.out.println("Total posts: " + postAmount + "\n");
+    return postAmount;
+  }
+
   public static void main(String[] args) {
-    String urlToPatient = "https://x.com/lexfridman";
+    String urlToPatient = "https://x.com/Deepression_AI";
     Scraping scraping = new Scraping();
     List<Post> postList = scraping.scrapePatient(urlToPatient);
 
