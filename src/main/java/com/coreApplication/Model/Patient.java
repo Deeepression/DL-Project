@@ -26,9 +26,9 @@ public class Patient {
     public void updateGeneralStatus() {
         double averageScore = this.getPosts().stream().mapToDouble(Post::getPrediction).average().orElse(0) *  100;
         String status;
-        if (averageScore > 60) {
+        if (averageScore > 75) {
             status = "BAD";
-        } else if (averageScore > 30) {
+        } else if (averageScore > 66) {
             status = "MEDIUM";
         } else {
             status = "GOOD";

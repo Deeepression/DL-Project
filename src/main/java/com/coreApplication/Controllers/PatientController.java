@@ -86,9 +86,13 @@ public class PatientController {
 
     private List<Post> createAndSavePosts(List<Post> newPosts, String patientId) {
         List<Post> postList = new ArrayList<>();
+        var index = 0;
         for (Post postContent : newPosts) {
             predictionController.setPredictionAsync(postContent);
             postList.add(postContent);
+            // print indication
+            log.info("Post " + index + " been predicted.");
+            index++;
         }
         return postList;
     }

@@ -14,6 +14,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Scraping {
 
+  private static final int MAX_TRIES = 3;
   private static final String USERNAME_ACCOUNT_X = "deepression_ai";
   private static final String PASSWORD_ACCOUNT_X = "Kobikobi20";
   private static final String EMAIL_ACCOUNT_X = "deepression.ai@gmail.com";
@@ -40,10 +41,8 @@ public class Scraping {
   private final List<Post> postList = new ArrayList<>();
 
   public List<Post> scrapePatient(String url) {
-
     System.out.println("Initializing ChromeDriver...");
     ChromeOptions options = new ChromeOptions();
-    //options.addArguments("--headless=new");
     WebDriver driver = new ChromeDriver(options);
     driver.manage().window().maximize();
 
@@ -56,24 +55,24 @@ public class Scraping {
       // Cancel ad
       System.out.println("Waiting for ad cancel button...\n");
       WebElement adCancelButton = wait.until(
-          ExpectedConditions.elementToBeClickable(By.xpath(AD_CANCEL_BUTTON_XPATH)));
+              ExpectedConditions.elementToBeClickable(By.xpath(AD_CANCEL_BUTTON_XPATH)));
       adCancelButton.click();
       System.out.println("Ad canceled.\n");
 
       // Log in
       System.out.println("Waiting for sign-in button...\n");
       WebElement signInButton = wait.until(
-          ExpectedConditions.elementToBeClickable(By.xpath(SIGN_IN_BUTTON_XPATH)));
+              ExpectedConditions.elementToBeClickable(By.xpath(SIGN_IN_BUTTON_XPATH)));
       signInButton.click();
 
       System.out.println("Entering username: " + USERNAME_ACCOUNT_X + "...\n");
       WebElement usernameInput = wait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(USERNAME_INPUT_XPATH)));
+              ExpectedConditions.visibilityOfElementLocated(By.xpath(USERNAME_INPUT_XPATH)));
       usernameInput.sendKeys(USERNAME_ACCOUNT_X);
 
       System.out.println("Clicking 'Next' button...\n");
       WebElement usernameButton = wait.until(
-          ExpectedConditions.elementToBeClickable(By.xpath(USERNAME_BUTTON_XPATH)));
+              ExpectedConditions.elementToBeClickable(By.xpath(USERNAME_BUTTON_XPATH)));
       usernameButton.click();
 
       try{
@@ -89,18 +88,18 @@ public class Scraping {
 
       System.out.println("Entering password...\n");
       WebElement passwordInput = wait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(PASSWORD_INPUT_XPATH)));
+              ExpectedConditions.visibilityOfElementLocated(By.xpath(PASSWORD_INPUT_XPATH)));
       passwordInput.sendKeys(PASSWORD_ACCOUNT_X);
 
       System.out.println("Clicking 'Login' button...\n");
       WebElement passwordButton = wait.until(
-          ExpectedConditions.elementToBeClickable(By.xpath(PASSWORD_BUTTON_XPATH)));
+              ExpectedConditions.elementToBeClickable(By.xpath(PASSWORD_BUTTON_XPATH)));
       passwordButton.click();
 
       // Cancel ad again if needed
       System.out.println("Waiting for ad cancel button again...\n");
       adCancelButton = wait.until(
-          ExpectedConditions.elementToBeClickable(By.xpath(AD_CANCEL_BUTTON_XPATH)));
+              ExpectedConditions.elementToBeClickable(By.xpath(AD_CANCEL_BUTTON_XPATH)));
       adCancelButton.click();
       System.out.println("Ad canceled again.\n");
 
@@ -110,7 +109,7 @@ public class Scraping {
 
       System.out.println("Waiting for patient's username to be visible...\n");
       WebElement usernamePatientElement = wait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(USERNAME_PATIENT_XPATH)));
+              ExpectedConditions.visibilityOfElementLocated(By.xpath(USERNAME_PATIENT_XPATH)));
       String usernamePatient = usernamePatientElement.getText().toLowerCase();
       System.out.println("Patient's username: " + usernamePatient + "\n");
 
@@ -121,22 +120,32 @@ public class Scraping {
       postAmount = convertToPostAmount(postAmountString);
 
       WebElement html = driver.findElement(By.tagName("html"));
-      //html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
 
       // Scrape posts
       for (int i = 1; i <= postAmount; i++) {
-        try {
-          String postTextXPath = String.format(POST_TEXT_XPATH, usernamePatient, i);
-          String postDateXPath = String.format(POST_DATE_XPATH, usernamePatient, i);
+        int tries = 0;
+        boolean success = false;
+        while (!success) {
+          try {
+            String postTextXPath = String.format(POST_TEXT_XPATH, usernamePatient, i);
+            String postDateXPath = String.format(POST_DATE_XPATH, usernamePatient, i);
 
-          System.out.println("Retrieving post " + i + "...\n");
-          retrievePost(waitPerPost, postTextXPath, postDateXPath);
-          System.out.println("Post " + i + " retrieved.\n");
-
-        } catch (Exception e) {
-          html.sendKeys(Keys.chord(Keys.PAGE_DOWN));
-          System.err.println("Failed to retrieve post " + i + ": " + e.getMessage() + "\n");
-          i--;
+            System.out.println("Retrieving post " + i + " (try " + (tries + 1) + ")...\n");
+            retrievePost(waitPerPost, postTextXPath, postDateXPath);
+            System.out.println("Post " + i + " retrieved.\n");
+            success = true;
+          } catch (Exception e) {
+            tries++;
+            if (tries >= MAX_TRIES) {
+              System.out.println("Failed to retrieve post " + i + " after " + MAX_TRIES + " tries.\n");
+              break;
+            }
+            // Scroll down a bit
+            html.sendKeys(Keys.PAGE_DOWN);
+          }
+        }
+        if (!success) {
+          break; // Break from the outer loop if the maximum number of tries is exceeded
         }
       }
     } catch (Exception e) {

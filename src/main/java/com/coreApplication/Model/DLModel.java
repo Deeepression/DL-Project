@@ -21,7 +21,7 @@ public class DLModel {
                     return Float.parseFloat(output.trim());
                 } else {
                     System.err.println("No output from the Python script.");
-                    return -1;
+                    return 0;
                 }
             } else {
                 BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
@@ -29,11 +29,11 @@ public class DLModel {
                 while ((errorLine = error.readLine()) != null) {
                     System.err.println(errorLine);
                 }
-                return -1;
+                return 0;
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            return -1;
+            return 0;
         }
     }
 
@@ -44,7 +44,7 @@ public class DLModel {
         // b. source venv/bin/activate
         // c. pip install torch transformers
         // 2. Change the absolutePath to the path of the virtual environment in the project
-        String absolutePath = "/Users/user/Documents/GitHub/DL-Project/venv/bin/activate";
+        String absolutePath = "/Users/delouya.thefist/IdeaProjects/DL-Project/venv/bin/activate";
         String command = "/bin/zsh -c \"source " + absolutePath + " && python src/main/python/modelPredictionScript.txt \\\"" + text.replace("\"", "\\\"") + "\\\"\"";
         ProcessBuilder pb = new ProcessBuilder("/bin/zsh", "-c", command);
         Process p = pb.start();
