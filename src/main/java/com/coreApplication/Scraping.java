@@ -21,6 +21,8 @@ public class Scraping {
   private static final int TIMEOUT_IN_SECONDS = 30;
   private static final int TIMEOUT_IN_SECONDS_PER_POST = 3;
   private static int postCounter = 0;
+  private static double postAmountDouble;
+  private static int postAmount;
 
   private static final String AD_CANCEL_BUTTON_XPATH = "//*[@data-testid='xMigrationBottomBar']";
   private static final String SIGN_IN_BUTTON_XPATH = "//*[@data-testid='loginButton']";
@@ -32,14 +34,13 @@ public class Scraping {
   private static final String POST_AMOUNT_XPATH = "//main//div[@data-testid='primaryColumn']//div[contains(text(),'posts')]";
   private static final String POST_TEXT_XPATH = "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='%s']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText']/span)[%d]";
   private static final String POST_DATE_XPATH = "(//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='%s']/ancestor::section//*[@data-testid='tweet']//*[@data-testid='tweetText'])[ %d ]/parent::div/parent::div//time";
-
   private final List<Post> postList = new ArrayList<>();
 
   public List<Post> scrapePatient(String url) {
 
     System.out.println("Initializing ChromeDriver...");
     ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless=new");
+    //options.addArguments("--headless=new");
     WebDriver driver = new ChromeDriver(options);
     driver.manage().window().maximize();
 
@@ -100,13 +101,20 @@ public class Scraping {
       System.out.println("Patient's username: " + usernamePatient + "\n");
 
       System.out.println("Waiting for post amount to be visible...\n");
-      WebElement postElementAmount = wait.until(
-          ExpectedConditions.visibilityOfElementLocated(By.xpath(POST_AMOUNT_XPATH)));
-      int postAmount = Integer.parseInt(postElementAmount.getText().split(" ")[0]);
+      String postAmountString = wait.until(
+          ExpectedConditions.visibilityOfElementLocated(By.xpath(POST_AMOUNT_XPATH))).getText().split(" ")[0];
+      if(postAmountString.contains("K")){
+        postAmountString = postAmountString.replace("K","");
+        postAmountDouble = Double.parseDouble(postAmountString) * 1000;
+      } else if (postAmountString.contains(",")) {
+        postAmountString = postAmountString.replace(",","");
+        postAmountDouble = Double.parseDouble(postAmountString);
+      }else postAmountDouble = Double.parseDouble(postAmountString);
+      postAmount = (int)postAmountDouble;
       System.out.println("Total posts: " + postAmount + "\n");
 
       WebElement html = driver.findElement(By.tagName("html"));
-      html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
+      //html.sendKeys(Keys.chord(Keys.CONTROL, Keys.SUBTRACT));
 
       // Scrape posts
       for (int i = 1; i <= postAmount; i++) {
@@ -149,7 +157,7 @@ public class Scraping {
   }
 
   public static void main(String[] args) {
-    String urlToPatient = "https://x.com/Deepression_AI";
+    String urlToPatient = "https://x.com/lexfridman";
     Scraping scraping = new Scraping();
     List<Post> postList = scraping.scrapePatient(urlToPatient);
 
