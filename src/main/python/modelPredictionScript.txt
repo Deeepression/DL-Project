@@ -4,35 +4,102 @@ from transformers import BertModel, BertTokenizer
 
 
 class CustomClassifier(nn.Module):
-    def __init__(self):
+    def __init__(self, dropout_rate=0.4):
         super(CustomClassifier, self).__init__()
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
-        self.dropout = nn.Dropout(0.1)
-        self.dense_layer = nn.Linear(768, 256)
-        self.output_layer = nn.Linear(256, 1)
+        self.bert = BertModel.from_pretrained('bert-base-multilingual-uncased')
+
+        # Freeze BERT layers
+        for param in self.bert.parameters():
+            param.requires_grad = False
+
+        # Multi-head self-attention
+        self.multihead_attn = nn.MultiheadAttention(embed_dim=768, num_heads=8)
+
+        # Bi-directional LSTM
+        self.bilstm = nn.LSTM(768, 512, bidirectional=True, batch_first=True)
+
+        # Fully connected layers
+        self.fc1 = nn.Linear(1024, 512)
+        self.fc2 = nn.Linear(512, 512)
+        self.fc3 = nn.Linear(512, 512)
+        self.fc4 = nn.Linear(512, 256)
+        self.fc5 = nn.Linear(256, 128)
+        self.fc6 = nn.Linear(128, 64)
+        self.fc7 = nn.Linear(64, 1)
+
+        # Batch normalization layers
+        self.bn1 = nn.BatchNorm1d(512)
+        self.bn2 = nn.BatchNorm1d(512)
+        self.bn3 = nn.BatchNorm1d(512)
+        self.bn4 = nn.BatchNorm1d(256)
+        self.bn5 = nn.BatchNorm1d(128)
+        self.bn6 = nn.BatchNorm1d(64)
+
+        # Dropout
+        self.dropout = nn.Dropout(dropout_rate)
 
     def forward(self, input_ids, attention_mask):
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
-        pooled_output = outputs.pooler_output
-        pooled_output = self.dropout(pooled_output)
-        dense_output = self.dense_layer(pooled_output)
-        output = self.output_layer(dense_output)
+        sequence_output = outputs.last_hidden_state
+
+        # Multi-head self-attention
+        attn_output, _ = self.multihead_attn(sequence_output.transpose(0, 1), sequence_output.transpose(0, 1), sequence_output.transpose(0, 1))
+        attn_output = attn_output.transpose(0, 1)
+
+        # Bi-directional LSTM
+        lstm_output, _ = self.bilstm(attn_output)
+        lstm_output = lstm_output[:, -1, :]  # Take the last hidden state
+
+        # Forward pass through fully connected layers with batch normalization
+        x = self.fc1(lstm_output)
+        x = self.bn1(x)
+        x = torch.relu(x)
+        x = self.dropout(x)
+
+        x = self.fc2(x)
+        x = self.bn2(x)
+        x = torch.relu(x)
+        x = self.dropout(x)
+
+        x = self.fc3(x)
+        x = self.bn3(x)
+        x = torch.relu(x)
+        x = self.dropout(x)
+
+        x = self.fc4(x)
+        x = self.bn4(x)
+        x = torch.relu(x)
+        x = self.dropout(x)
+
+        x = self.fc5(x)
+        x = self.bn5(x)
+        x = torch.relu(x)
+        x = self.dropout(x)
+
+        x = self.fc6(x)
+        x = self.bn6(x)
+        x = torch.relu(x)
+        x = self.dropout(x)
+
+        output = self.fc7(x)
+
         return output
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 _model = CustomClassifier()
 _model.to(device)
 
-_model.load_state_dict(torch.load('/Users/user/Downloads/model_weights.pth', map_location=device))
+_model.load_state_dict(torch.load('src/main/python/new_best_final_model.pth', map_location=device))
 _model.eval()
 
-_tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+_tokenizer = BertTokenizer.from_pretrained("bert-base-multilingual-uncased")
 
 
 def predict_custom_string(model, tokenizer, text):
     model.eval()
-    encoded_input = tokenizer(text, padding=True, truncation=True, max_length=128, return_tensors='pt')
+    encoded_input = tokenizer(text, padding=True, truncation=True, max_length=256, return_tensors='pt')
     input_ids = encoded_input['input_ids'].to(device)
     attention_mask = encoded_input['attention_mask'].to(device)
     with torch.no_grad():
