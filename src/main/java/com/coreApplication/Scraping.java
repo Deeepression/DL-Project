@@ -77,7 +77,7 @@ public class Scraping {
 
       try{
         System.out.println("Unusual login - Enter email: " + EMAIL_ACCOUNT_X + "...\n");
-        WebElement unusualLogin = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UNUSUAL_LOGIN_INPUT_XPATH)));
+        WebElement unusualLogin = waitPerPost.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UNUSUAL_LOGIN_INPUT_XPATH)));
         unusualLogin.sendKeys(EMAIL_ACCOUNT_X);
 
         System.out.println("Clicking 'Next' button...\n");
